@@ -2,10 +2,12 @@ package com.mercadolivro.controller
 
 import com.mercadolivro.controller.request.PostCustomerRequest
 import com.mercadolivro.controller.request.PutCustomerRequest
+import com.mercadolivro.controller.response.CustomerBookPurchaseResponse
 import com.mercadolivro.controller.response.CustomerResponse
 import com.mercadolivro.extension.toCustomerModel
 import com.mercadolivro.extension.toResponse
 import com.mercadolivro.service.CustomerService
+import com.mercadolivro.service.PurchaseService
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
 import javax.validation.Valid
@@ -13,7 +15,8 @@ import javax.validation.Valid
 @RestController
 @RequestMapping("customer")
 class CustomerController(
-    val customerService : CustomerService
+    val customerService : CustomerService,
+    val purchaseService: PurchaseService
 ) {
 
     @GetMapping
@@ -43,5 +46,11 @@ class CustomerController(
     @ResponseStatus(HttpStatus.NO_CONTENT)
     fun delete(@PathVariable id: Int) {
         customerService.delete(id)
+    }
+
+    @GetMapping("{id}/books/purchase")
+    fun getAllBooksPurchaseByCustomer(@PathVariable id: Int): CustomerBookPurchaseResponse {
+        val customer = customerService.findById(id)
+        return purchaseService.findAllByCustomer(customer).toResponse(customer)
     }
 }

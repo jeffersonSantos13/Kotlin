@@ -2,6 +2,7 @@ package com.mercadolivro.service
 
 import com.mercadolivro.enums.BookStatus
 import com.mercadolivro.enums.Errors
+import com.mercadolivro.exception.BadRequestException
 import com.mercadolivro.exception.NotFoundException
 import com.mercadolivro.model.BookModel
 import com.mercadolivro.model.CustomerModel
@@ -33,6 +34,15 @@ class BookService(
         }
     }
 
+    fun isBookAvailableToPurchase(books: List<BookModel>) {
+        books.forEach { book ->
+            if ( book.status == BookStatus.CANCELADO ||
+                book.status == BookStatus.DELETADO) {
+                throw BadRequestException(Errors.ML103.message.format(book.status), Errors.ML103.code)
+            }
+        }
+    }
+
     fun delete(id: Int) {
         val book = findById(id)
 
@@ -49,6 +59,17 @@ class BookService(
         val books = bookRepository.findByCustomer(customer)
         for(book in books) {
             book.status = BookStatus.DELETADO
+        }
+        bookRepository.saveAll(books)
+    }
+
+    fun findAllByIds(bookIds: Set<Int>): List<BookModel> {
+        return bookRepository.findAllById(bookIds).toList()
+    }
+
+    fun purchase(books: MutableList<BookModel>) {
+        books.map {
+            it.status = BookStatus.VENDIDO
         }
         bookRepository.saveAll(books)
     }

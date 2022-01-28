@@ -5,11 +5,13 @@ import com.mercadolivro.controller.request.PostCustomerRequest
 import com.mercadolivro.controller.request.PutBookRequest
 import com.mercadolivro.controller.request.PutCustomerRequest
 import com.mercadolivro.controller.response.BookResponse
+import com.mercadolivro.controller.response.CustomerBookPurchaseResponse
 import com.mercadolivro.controller.response.CustomerResponse
 import com.mercadolivro.enums.BookStatus
 import com.mercadolivro.enums.CustomerStatus
 import com.mercadolivro.model.BookModel
 import com.mercadolivro.model.CustomerModel
+import com.mercadolivro.model.PurchaseModel
 
 fun PostCustomerRequest.toCustomerModel(): CustomerModel {
     return CustomerModel(name = this.name, email = this.email, status = CustomerStatus.ATIVO)
@@ -59,5 +61,19 @@ fun BookModel.toResponse(): BookResponse {
         price = this.price,
         customer = this.customer,
         status = this.status
+    )
+}
+
+fun List<PurchaseModel>.toResponse(customer: CustomerModel): CustomerBookPurchaseResponse {
+
+    val books: ArrayList<BookModel> = ArrayList()
+
+    for (purchase in this) {
+        books.addAll(purchase.books)
+    }
+
+    return CustomerBookPurchaseResponse(
+        customer = customer,
+        books = books
     )
 }
